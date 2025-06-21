@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern YouTube Player</title>
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --primary-hover: #cc0000;
+            --dark-bg: #0f0f0f;
+            --light-text: #f1f1f1;
+            --dark-text: #272727;
+            --button-bg: #333;
+            --button-hover: #444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            padding-top: 0px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .fixed-player {
+            position: sticky;
+            top: 0px;
+            z-index: 100;
+            width: 350px;
+            margin-bottom: 20px;
+            background-color: var(--dark-bg);
+        }
+        
+        .player-container {
+            position: relative;
+            width: 365px;
+            right: 16px;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background-color: #000;
+            transform: scale(0.98);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .player-container:hover {
+            transform: scale(1);
+            box-shadow: 0 15px 30px rgba(255, 0, 0, 0.2);
+        }
+        
+        .player-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .player-container:hover .player-cover {
+            opacity: 1;
+        }
+        
+        #youtube-player {
+            position: absolute;
+            top: 0;
+            right: 10px;
+            width: 365px;
+            height: 200px;
+            border: none;
+        }
+        
+        /* Custom Controls */
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .player-container:hover .custom-controls {
+            opacity: 1;
+        }
+        
+        .control-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #555;
+            outline: none;
+            border-radius: 2px;
+            transition: opacity 0.2s;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        /* Skip buttons container */
+        .skip-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .skip-btn {
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+        
+        .player-container:hover .skip-btn {
+            opacity: 1;
+        }
+        
+        .skip-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        /* Progress bar container */
+        .progress-container {
+            width: 100%;
+            background-color: #333;
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .progress-container:hover .progress-bar::after {
+            opacity: 1;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        /* Hide ALL YouTube branding elements */
+        .ytp-watermark,
+        .ytp-title-channel,
+        .ytp-title-link,
+        .ytp-chrome-top-buttons,
+        .ytp-show-cards-title,
+        .ytp-gradient-top,
+        .ytp-branding-logo,
+        .ytp-branding-icon,
+        .ytp-branding-name,
+        .ytp-cards-button-icon,
+        .ytp-cards-teaser,
+        .ytp-cards-teaser-box {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        .player-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-top: 20px;
+        }
+        
+        .video-info {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .video-info:hover {
+            background-color: #2a2a2a;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.1);
+        }
+        
+        .video-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+        
+        .video-stats {
+            display: flex;
+            gap: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        /* Neon Button Styles */
+        .neon-btn {
+            position: relative;
+            display: inline-block;
+            padding: 15px 30px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            overflow: hidden;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            border-radius: 4px;
+            margin: 0 auto;
+            width: 300px;
+            text-align: center;
+        }
+        
+        /* Button 1: Classic Neon */
+        .neon-btn-1 {
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+            border: 2px solid #0ff;
+        }
+        
+        .neon-btn-1:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 10px #0ff, 0 0 40px #0ff, 0 0 80px #0ff;
+        }
+        
+        /* Button 2: Pulsing Neon */
+        .neon-btn-2 {
+            color: #f0f;
+            border: 2px solid #f0f;
+            animation: pulse-purple 2s infinite;
+        }
+        
+        @keyframes pulse-purple {
+            0%, 100% {
+                box-shadow: 0 0 5px #f0f, 0 0 10px #f0f;
+                text-shadow: 0 0 5px #f0f;
+            }
+            50% {
+                box-shadow: 0 0 20px #f0f, 0 0 40px #f0f;
+                text-shadow: 0 0 10px #f0f;
+            }
+        }
+        
+        .neon-btn-2:hover {
+            animation: none;
+            box-shadow: 0 0 20px #f0f, 0 0 40px #f0f, 0 0 80px #f0f;
+        }
+        
+        /* Button 3: Neon Flicker */
+        .neon-btn-3 {
+            color: #ff0;
+            border: 2px solid #ff0;
+            box-shadow: 0 0 10px #ff0;
+            text-shadow: 0 0 5px #ff0;
+        }
+        
+        .neon-btn-3:hover {
+            animation: flicker 1s infinite alternate;
+            box-shadow: 0 0 20px #ff0;
+        }
+        
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                box-shadow: 0 0 10px #ff0, 0 0 20px #ff0;
+                text-shadow: 0 0 10px #ff0;
+            }
+            20%, 24%, 55% {
+                box-shadow: none;
+                text-shadow: none;
+            }
+        }
+        
+        /* Button 4: Neon Border Glow */
+        .neon-btn-4 {
+            color: #0f0;
+            border: 2px solid #0f0;
+        }
+        
+        .neon-btn-4:hover {
+            box-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 40px #0f0;
+            text-shadow: 0 0 5px #0f0;
+            background: #0f0;
+            color: #000;
+        }
+        
+        /* Button 5: Neon Gradient */
+        .neon-btn-5 {
+            color: #fff;
+            border: 2px solid transparent;
+            background: linear-gradient(90deg, #f00, #f0f, #00f, #0ff, #0f0, #ff0, #f00);
+            background-size: 400%;
+            animation: gradient 8s linear infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0%; }
+            100% { background-position: 400%; }
+        }
+        
+        .neon-btn-5:hover {
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+        }
+        
+        /* Button 6: Neon Text Only */
+        .neon-btn-6 {
+            color: #ff5e5e;
+            text-shadow: 0 0 5px #ff5e5e, 0 0 10px #ff5e5e;
+            border: 2px solid transparent;
+        }
+        
+        .neon-btn-6:hover {
+            animation: text-glow 0.5s infinite alternate;
+        }
+        
+        @keyframes text-glow {
+            to {
+                text-shadow: 0 0 10px #ff5e5e, 0 0 20px #ff5e5e, 0 0 30px #ff5e5e;
+            }
+        }
+        
+        /* Button 7: Neon Underline */
+        .neon-btn-7 {
+            color: #0ff;
+            border: none;
+            padding-bottom: 5px;
+        }
+        
+        .neon-btn-7::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0ff;
+            box-shadow: 0 0 5px #0ff;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .neon-btn-7:hover::after {
+            transform: scaleX(1);
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+        }
+        
+        /* Button 8: Neon Spotlight */
+        .neon-btn-8 {
+            color: #fff;
+            border: 2px solid #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+        
+        .neon-btn-8:hover {
+            box-shadow: inset 0 0 20px #fff, 0 0 20px #fff;
+        }
+        
+        /* Button 9: Neon Double Border */
+        .neon-btn-9 {
+            color: #f0f;
+            border: 2px solid #f0f;
+            box-shadow: 0 0 10px #f0f, inset 0 0 10px #f0f;
+        }
+        
+        .neon-btn-9:hover {
+            box-shadow: 0 0 20px #f0f, inset 0 0 20px #f0f;
+            text-shadow: 0 0 10px #f0f;
+        }
+        
+        /* Button 10: Neon Scan Line */
+        .neon-btn-10 {
+            color: #0f0;
+            border: 2px solid #0f0;
+            overflow: hidden;
+        }
+        
+        .neon-btn-10::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 255, 0, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .neon-btn-10:hover {
+            box-shadow: 0 0 10px #0f0, 0 0 40px #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+        
+        .neon-btn-10:hover::before {
+            top: 100%;
+        }
+        
+        .active {
+            background: #0ff !important;
+            color: #000 !important;
+            box-shadow: 0 0 20px #0ff, 0 0 40px #0ff !important;
+            animation: none !important;
+        }
+        
+        .status-bar {
+            padding: 10px;
+            background-color: #333;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .status-bar.loading {
+            display: block;
+            background: linear-gradient(90deg, #ff9800, #ffc107, #ff9800);
+            background-size: 200% auto;
+            color: #000;
+            animation: loadingGradient 2s linear infinite;
+        }
+        
+        .status-bar.playing {
+            display: block;
+            background: linear-gradient(90deg, #4caf50, #8bc34a, #4caf50);
+            color: white;
+        }
+        
+        .status-bar.error {
+            display: block;
+            background: linear-gradient(90deg, #f44336, #ff5722, #f44336);
+            background-size: 200% auto;
+            color: white;
+            animation: errorPulse 1.5s ease infinite;
+        }
+        
+        @keyframes loadingGradient {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        @keyframes errorPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .player-controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .neon-btn {
+                width: 100%;
+            }
+            
+            .player-container {
+                transform: none;
+            }
+            
+            .player-container:hover {
+                transform: none;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="fixed-player">
+            <div class="player-container">
+                <div class="player-cover"></div>
+                <iframe id="youtube-player" 
+                        src="https://www.youtube.com/embed/8yslaApEuH4?enablejsapi=1&rel=0&modestbranding=1&controls=0&showinfo=0&autoplay=1&mute=1" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen></iframe>
+                
+                <!-- Skip controls -->
+                <div class="skip-controls">
+                    <button class="skip-btn skip-back-btn">⏮ 15s</button>
+                    <button class="skip-btn skip-forward-btn">⏭ 30s</button>
+                </div>
+                
+                <!-- Custom Controls -->
+                <div class="custom-controls">
+                    <button class="control-btn play-pause-btn">⏯</button>
+                    <div class="volume-control">
+                        <button class="control-btn mute-btn">🔇</button>
+                        <input type="range" class="volume-slider" min="0" max="100" value="50">
+                    </div>
+                    <button class="control-btn fullscreen-btn">⛶</button>
+                </div>
+            </div>
+            
+            <!-- Progress bar and time display -->
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="time-display">
+                <span class="current-time">0:00</span>
+                <span class="duration">0:00</span>
+            </div>
+            
+            <div id="status-bar" class="status-bar"></div>
+        </div>
+        
+        <div class="preset-buttons">
+            <button class="neon-btn neon-btn-1" data-id="8yslaApEuH4">Episode 1</button>
+            <button class="neon-btn neon-btn-2" data-id="i9swPAKkjf8">Episode 2</button>
+            <button class="neon-btn neon-btn-3" data-id="PVcG_gjmcL8">Episode 3</button>
+            <button class="neon-btn neon-btn-4" data-id="giLWS6ShhWw">Episode 4</button>
+            <button class="neon-btn neon-btn-5" data-id="nGn96Dr2ok8">Episode 5</button>         
+                    
+            <button class="neon-btn neon-btn-8" data-id="51RIBf8FvrU">Episode 6</button>     
+            <button class="neon-btn neon-btn-9" data-id="uV3AnZltz4k">Episode 7</button>     
+            <button class="neon-btn neon-btn-10" data-id="fDIJyANQh64">Episode 8</button>
+            
+          <button class="neon-btn neon-btn-1" data-id="_ubBrl459g4">Episode 9</button>
+            <button class="neon-btn neon-btn-2" data-id="r75wJlVL1bo">Episode 10</button>
+            <button class="neon-btn neon-btn-3" data-id="m8F029Nq4NY">Episode 11</button>
+            <button class="neon-btn neon-btn-4" data-id="xUup5atyqzA">Episode 12</button>
+            <button class="neon-btn neon-btn-5" data-id="7SrcCQBL6XY">Episode 13</button>         
+                    
+            <button class="neon-btn neon-btn-8" data-id="lHErur3sZic">Episode 14</button>     
+            <button class="neon-btn neon-btn-9" data-id="DckbOD8V418">Episode 15</button>     
+            <button class="neon-btn neon-btn-10" data-id="Zd9Zs_u8xPM">Episode 16</button>         
+            
+         <button class="neon-btn neon-btn-1" data-id="pbHcZg1pWr8">Episode 17</button>
+            <button class="neon-btn neon-btn-2" data-id="lJ67gcI5U-A">Episode 18</button>
+            <button class="neon-btn neon-btn-3" data-id="zSh9s5KRVz4">Episode 19</button>
+            <button class="neon-btn neon-btn-4" data-id="SewGFTWPhwU">Episode 20</button>
+            <button class="neon-btn neon-btn-5" data-id="N6ddV0FtHZQ">Episode 21</button>         
+                    
+            <button class="neon-btn neon-btn-8" data-id="LPxe4I5iSXI">Episode 22</button>     
+            <button class="neon-btn neon-btn-9" data-id="Rx2jBse1to0">Episode 23</button>     
+            <button class="neon-btn neon-btn-10" data-id="rSRzAj757hI">Episode 24</button>          
+             <button class="neon-btn neon-btn-1" data-id="-934qKDuzVU">Episode 25</button>
+            <button class="neon-btn neon-btn-2" data-id="C6EX0ZZjqzA">Episode 26</button>
+            <button class="neon-btn neon-btn-3" data-id="zNBingJMXPk">Episode 27</button>
+            <button class="neon-btn neon-btn-4" data-id="SLyGdUpbx0k">Episode 28</button>
+            <button class="neon-btn neon-btn-5" data-id="sFFdMQ7-0QU">Episode 29</button>         
+                    
+            <button class="neon-btn neon-btn-8" data-id="pWG8Dx0hMe8">Episode 30</button>     
+            <button class="neon-btn neon-btn-9" data-id="XpQJn6B8zF0">Episode 31</button>     
+            <button class="neon-btn neon-btn-10" data-id="4jAVsLxjulY">Episode 32</button>    
+
+<button class="neon-btn neon-btn-4" data-id="oLeDcPaV6kw">Episode 33</button>
+            <button class="neon-btn neon-btn-5" data-id="MAihwfjeGl8">Episode 34</button>         
+                    
+        
+            
+            
+   <button class="neon-btn neon-btn-8" data-id="qCl5kIXOp_o">Episode 35</button>     
+            <button class="neon-btn neon-btn-9" data-id="aGrfoIvJ3Gw">Episode 36</button>     
+            <button class="neon-btn neon-btn-10" data-id="4L6w_tuDxIU">Episode 37</button>          
+             <button class="neon-btn neon-btn-1" data-id="-caUMHDvo3Vc">Episode 38</button>
+            <button class="neon-btn neon-btn-2" data-id="BSzmQ5eYmU8">Episode 39</button>
+            <button class="neon-btn neon-btn-3" data-id="2jG47RBKpuk">Episode 40</button>
+            <button class="neon-btn neon-btn-4" data-id="hpq5Wm2PCTg">Episode 41</button>
+            <button class="neon-btn neon-btn-5" data-id="xogij-eiCCo">Episode 42</button>         
+                    
+            <button class="neon-btn neon-btn-8" data-id="KRHfPTG6QTo">Episode 43</button>     
+            <button class="neon-btn neon-btn-9" data-id="MFTkK0kdRBU">Episode 44</button>     
+            <button class="neon-btn neon-btn-10" data-id="LbrNP9tF6Ug">Episode 45 </button>    
+
+<button class="neon-btn neon-btn-4" data-id="1jV0uSGMB_c">Episode 46</button>
+              
+        
+<button class="neon-btn neon-btn-10" data-id="9ZZxUOpfHc0">Episode 47</button>    
+
+<button class="neon-btn neon-btn-4" data-id="SCUpryLuiME">Episode 48</button>
+            
+
+<button class="neon-btn neon-btn-10" data-id="d7AfHmRr-38">Episode 49</button>    
+
+<button class="neon-btn neon-btn-4" data-id="G6CXlgjgTBw">Episode 50</button>
+            <button class="neon-btn neon-btn-5" data-id="eM7YEt5yH2M">Episode 51</button>  
+
+<button class="neon-btn neon-btn-10" data-id="RmHulsOL2WY">Episode 52 Promo </button>    
+
+
+
+
+
+
+
+    
+        </div>
+        
+        <div class="video-info">
+            <div class="video-title" id="video-title">Now Playing: Loading...</div>
+            <div class="video-stats">
+                <span id="view-count">0 views</span>
+                <span id="like-count">0 likes</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load YouTube API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        let player;
+        const statusBar = document.getElementById('status-bar');
+        const videoTitle = document.getElementById('video-title');
+        let isFirstPlay = true;
+        let progressInterval;
+        let currentVideoDuration = 0;
+        let isMuted = true;
+        
+        // Video data with titles
+        const videoData = {
+            '8yslaApEuH4': { title: 'Episode 1: The Beginning', views: '1.2M views', likes: '85K likes' },
+            'i9swPAKkjf8': { title: 'Episode 2: The Journey', views: '980K views', likes: '64K likes' },
+            'PVcG_gjmcL8': { title: 'Episode 3: The Adventure', views: '1.5M views', likes: '92K likes' },
+            'giLWS6ShhWw': { title: 'Episode 4: New Horizons', views: '1.1M views', likes: '78K likes' },
+            'nGn96Dr2ok8': { title: 'Episode 5: Turning Point', views: '1.3M views', likes: '88K likes' },
+            '51RIBf8FvrU': { title: 'Episode 6: Revelation', views: '1.4M views', likes: '95K likes' },
+            'uV3AnZltz4k': { title: 'Episode 7: The Challenge', views: '1.2M views', likes: '82K likes' },
+            'fDIJyANQh64': { title: 'Episode 8: Climax', views: '1.6M views', likes: '105K likes' },
+            '_ubBrl459g4': { title: 'Episode 9: New Allies', views: '1.1M views', likes: '77K likes' },
+            'r75wJlVL1bo': { title: 'Episode 10: The Plot Thickens', views: '1.3M views', likes: '89K likes' },
+            'm8F029Nq4NY': { title: 'Episode 11: Unexpected Twist', views: '1.4M views', likes: '94K likes' },
+            'xUup5atyqzA': { title: 'Episode 12: Final Preparations', views: '1.5M views', likes: '98K likes' },
+            '7SrcCQBL6XY': { title: 'Episode 13: The Battle Begins', views: '1.7M views', likes: '112K likes' },
+            'lHErur3sZic': { title: 'Episode 14: Midpoint', views: '1.3M views', likes: '87K likes' },
+            'DckbOD8V418': { title: 'Episode 15: Darkest Hour', views: '1.4M views', likes: '93K likes' },
+            'Zd9Zs_u8xPM': { title: 'Episode 16: Turning the Tide', views: '1.5M views', likes: '99K likes' },
+            'pbHcZg1pWr8': { title: 'Episode 17: New Discoveries', views: '1.2M views', likes: '83K likes' },
+            'lJ67gcI5U-A': { title: 'Episode 18: Secrets Revealed', views: '1.3M views', likes: '88K likes' },
+            'zSh9s5KRVz4': { title: 'Episode 19: The Truth', views: '1.5M views', likes: '101K likes' },
+            'SewGFTWPhwU': { title: 'Episode 20: Final Confrontation', views: '1.8M views', likes: '120K likes' },
+            'N6ddV0FtHZQ': { title: 'Episode 21: Aftermath', views: '1.4M views', likes: '95K likes' },
+            'LPxe4I5iSXI': { title: 'Episode 22: New Beginnings', views: '1.3M views', likes: '86K likes' },
+            'Rx2jBse1to0': { title: 'Episode 23: The Reunion', views: '1.2M views', likes: '82K likes' },
+            'rSRzAj757hI': { title: 'Episode 24: Epilogue', views: '1.1M views', likes: '76K likes' },
+            '-934qKDuzVU': { title: 'Episode 25: Special Episode', views: '1.0M views', likes: '72K likes' },
+            'C6EX0ZZjqzA': { title: 'Episode 26: Bonus Content', views: '950K views', likes: '68K likes' },
+            'zNBingJMXPk': { title: 'Episode 27: Behind the Scenes', views: '900K views', likes: '65K likes' },
+            'SLyGdUpbx0k': { title: 'Episode 28: Deleted Scenes', views: '850K views', likes: '62K likes' },
+            'sFFdMQ7-0QU': { title: 'Episode 29: Bloopers', views: '1.1M views', likes: '78K likes' },
+            'pWG8Dx0hMe8': { title: 'Episode 30: Interviews', views: '950K views', likes: '69K likes' },
+            'XpQJn6B8zF0': { title: 'Episode 31: Commentary', views: '800K views', likes: '58K likes' },
+            '4jAVsLxjulY': { title: 'Episode 32: Making Of', views: '750K views', likes: '55K likes' },
+            'oLeDcPaV6kw': { title: 'Episode 33: Concept Art', views: '700K views', likes: '52K likes' },
+            'MAihwfjeGl8': { title: 'Episode 34: Final Thoughts', views: '1.2M views', likes: '84K likes' }
+        };
+        
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            updateVideoInfo('8yslaApEuH4');
+            updateStatus('ready');
+            
+            // Set initial volume
+            player.setVolume(50);
+            
+            // Start muted playback (required for autoplay in most browsers)
+            player.mute();
+            player.playVideo();
+            
+            // Setup custom controls
+            setupCustomControls();
+            
+            // Setup progress bar
+            setupProgressBar();
+        }
+        
+        function setupProgressBar() {
+            const progressContainer = document.querySelector('.progress-container');
+            const progressBar = document.querySelector('.progress-bar');
+            const currentTimeDisplay = document.querySelector('.current-time');
+            const durationDisplay = document.querySelector('.duration');
+            
+            // Click on progress bar to seek
+            progressContainer.addEventListener('click', (e) => {
+                if (!currentVideoDuration) return;
+                
+                const rect = progressContainer.getBoundingClientRect();
+                const pos = (e.clientX - rect.left) / rect.width;
+                const seekTime = pos * currentVideoDuration;
+                
+                player.seekTo(seekTime, true);
+            });
+            
+            // Update progress bar and time display
+            function updateProgress() {
+                if (!player || !player.getCurrentTime) return;
+                
+                const currentTime = player.getCurrentTime();
+                const duration = player.getDuration();
+                currentVideoDuration = duration;
+                
+                // Update progress bar
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Update time displays
+                currentTimeDisplay.textContent = formatTime(currentTime);
+                durationDisplay.textContent = formatTime(duration);
+            }
+            
+            // Format seconds into MM:SS
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }
+            
+            // Start progress interval when playing
+            function startProgressInterval() {
+                clearInterval(progressInterval);
+                updateProgress(); // Update immediately
+                progressInterval = setInterval(updateProgress, 1000);
+            }
+            
+            // Stop progress interval when paused or ended
+            function stopProgressInterval() {
+                clearInterval(progressInterval);
+            }
+            
+            // Expose these functions for global use
+            window.progressControls = {
+                updateProgress,
+                startProgressInterval,
+                stopProgressInterval
+            };
+        }
+        
+        function hideYouTubeBranding() {
+            // Hide watermark and other branding elements
+            const iframe = document.getElementById('youtube-player');
+            if (iframe && iframe.contentWindow) {
+                try {
+                    // This is a fallback in case CSS doesn't catch everything
+                    iframe.contentWindow.postMessage('{"event":"command","func":"setOption","args":["modestbranding",1]}', '*');
+                    iframe.contentWindow.postMessage('{"event":"command","func":"setOption","args":["showinfo",0]}', '*');
+                } catch (e) {
+                    console.log('Error hiding branding:', e);
+                }
+            }
+        }
+        
+        function setupCustomControls() {
+            const playPauseBtn = document.querySelector('.play-pause-btn');
+            const muteBtn = document.querySelector('.mute-btn');
+            const volumeSlider = document.querySelector('.volume-slider');
+            const fullscreenBtn = document.querySelector('.fullscreen-btn');
+            const skipBackBtn = document.querySelector('.skip-back-btn');
+            const skipForwardBtn = document.querySelector('.skip-forward-btn');
+            
+            // Play/Pause button
+            playPauseBtn.addEventListener('click', () => {
+                if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                    playPauseBtn.textContent = '▶';
+                    window.progressControls.stopProgressInterval();
+                } else {
+                    player.playVideo();
+                                        playPauseBtn.textContent = '⏸';
+                    window.progressControls.startProgressInterval();
+                }
+            });
+            
+            // Mute button
+            muteBtn.addEventListener('click', () => {
+                if (isMuted) {
+                    player.unMute();
+                    muteBtn.textContent = '🔊';
+                    isMuted = false;
+                } else {
+                    player.mute();
+                    muteBtn.textContent = '🔇';
+                    isMuted = true;
+                }
+            });
+            
+            // Volume slider
+            volumeSlider.addEventListener('input', (e) => {
+                const volume = e.target.value;
+                player.setVolume(volume);
+                
+                // Update mute state based on volume
+                if (volume == 0) {
+                    player.mute();
+                    muteBtn.textContent = '🔇';
+                    isMuted = true;
+                } else {
+                    if (isMuted) {
+                        player.unMute();
+                        muteBtn.textContent = '🔊';
+                        isMuted = false;
+                    }
+                }
+            });
+            
+            // Fullscreen button
+            fullscreenBtn.addEventListener('click', () => {
+                const iframe = document.getElementById('youtube-player');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            });
+            
+            // Skip back 15 seconds
+            skipBackBtn.addEventListener('click', () => {
+                const currentTime = player.getCurrentTime();
+                player.seekTo(Math.max(0, currentTime - 15), true);
+            });
+            
+            // Skip forward 30 seconds
+            skipForwardBtn.addEventListener('click', () => {
+                const currentTime = player.getCurrentTime();
+                const duration = player.getDuration();
+                player.seekTo(Math.min(duration, currentTime + 30), true);
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName.toLowerCase() === 'input') return;
+                
+                switch (e.key) {
+                    case ' ':
+                    case 'k':
+                        // Play/pause
+                        e.preventDefault();
+                        playPauseBtn.click();
+                        break;
+                    case 'm':
+                        // Mute/unmute
+                        e.preventDefault();
+                        muteBtn.click();
+                        break;
+                    case 'f':
+                        // Fullscreen
+                        e.preventDefault();
+                        fullscreenBtn.click();
+                        break;
+                    case 'ArrowLeft':
+                        // Seek back 5 seconds
+                        e.preventDefault();
+                        const currentTime = player.getCurrentTime();
+                        player.seekTo(Math.max(0, currentTime - 5), true);
+                        break;
+                    case 'ArrowRight':
+                        // Seek forward 5 seconds
+                        e.preventDefault();
+                        const currentTime2 = player.getCurrentTime();
+                        const duration = player.getDuration();
+                        player.seekTo(Math.min(duration, currentTime2 + 5), true);
+                        break;
+                    case 'ArrowUp':
+                        // Volume up
+                        e.preventDefault();
+                        volumeSlider.value = Math.min(100, parseInt(volumeSlider.value) + 10);
+                        volumeSlider.dispatchEvent(new Event('input'));
+                        break;
+                    case 'ArrowDown':
+                        // Volume down
+                        e.preventDefault();
+                        volumeSlider.value = Math.max(0, parseInt(volumeSlider.value) - 10);
+                        volumeSlider.dispatchEvent(new Event('input'));
+                        break;
+                }
+            });
+        }
+        
+        function onPlayerStateChange(event) {
+            const playPauseBtn = document.querySelector('.play-pause-btn');
+            
+            switch (event.data) {
+                case YT.PlayerState.PLAYING:
+                    updateStatus('playing');
+                    playPauseBtn.textContent = '⏸';
+                    window.progressControls.startProgressInterval();
+                    
+                    // Hide YouTube branding when playing
+                    if (isFirstPlay) {
+                        setTimeout(hideYouTubeBranding, 1000);
+                        isFirstPlay = false;
+                    }
+                    break;
+                case YT.PlayerState.PAUSED:
+                    updateStatus('paused');
+                    playPauseBtn.textContent = '▶';
+                    window.progressControls.stopProgressInterval();
+                    break;
+                case YT.PlayerState.ENDED:
+                    updateStatus('ended');
+                    playPauseBtn.textContent = '↻';
+                    window.progressControls.stopProgressInterval();
+                    break;
+                case YT.PlayerState.BUFFERING:
+                    updateStatus('loading');
+                    break;
+                case YT.PlayerState.CUED:
+                    updateStatus('ready');
+                    break;
+            }
+        }
+        
+        function onPlayerError(event) {
+            console.error('Player error:', event.data);
+            updateStatus('error', 'Error loading video');
+        }
+        
+        function updateStatus(status, message = '') {
+            statusBar.className = 'status-bar';
+            
+            switch (status) {
+                case 'loading':
+                    statusBar.classList.add('loading');
+                    statusBar.textContent = message || 'Loading video...';
+                    break;
+                case 'ready':
+                    statusBar.classList.add('playing');
+                    statusBar.textContent = message || 'Ready to play';
+                    setTimeout(() => statusBar.style.display = 'none', 2000);
+                    break;
+                case 'playing':
+                    statusBar.classList.add('playing');
+                    statusBar.textContent = message || 'Now playing';
+                    setTimeout(() => statusBar.style.display = 'none', 2000);
+                    break;
+                case 'paused':
+                    statusBar.textContent = message || 'Paused';
+                    statusBar.style.display = 'block';
+                    break;
+                case 'ended':
+                    statusBar.textContent = message || 'Playback ended';
+                    statusBar.style.display = 'block';
+                    break;
+                case 'error':
+                    statusBar.classList.add('error');
+                    statusBar.textContent = message || 'Error occurred';
+                    statusBar.style.display = 'block';
+                    break;
+            }
+        }
+        
+        function updateVideoInfo(videoId) {
+            const data = videoData[videoId] || { 
+                title: 'Unknown Video', 
+                views: '0 views', 
+                likes: '0 likes' 
+            };
+            
+            videoTitle.textContent = `Now Playing: ${data.title}`;
+            document.getElementById('view-count').textContent = data.views;
+            document.getElementById('like-count').textContent = data.likes;
+        }
+        
+        // Setup episode buttons
+        document.querySelectorAll('.neon-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-id');
+                
+                // Update active button style
+                document.querySelectorAll('.neon-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Load new video
+                updateStatus('loading', `Loading ${videoData[videoId]?.title || 'video'}...`);
+                player.loadVideoById(videoId);
+                updateVideoInfo(videoId);
+            });
+        });
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set first button as active
+            document.querySelector('.neon-btn').classList.add('active');
+        });
+    </script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    
+</body>
+</html>
