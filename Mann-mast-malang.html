@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern YouTube Player</title>
-    <style>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern YouTube Player</title>
+  <style>
         :root {
             --primary-color: #ff0000;
             --primary-hover: #cc0000;
@@ -591,140 +591,62 @@
             }
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="fixed-player">
-            <div class="player-container">
-                <div class="player-cover"></div>
-                <iframe id="youtube-player" 
-                        src="https://www.youtube.com/embed/8yslaApEuH4?enablejsapi=1&rel=0&modestbranding=1&controls=0&showinfo=0&autoplay=1&mute=1" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen></iframe>
-                
-                <!-- Skip controls -->
-                <div class="skip-controls">
-                    <button class="skip-btn skip-back-btn">⏮ 15s</button>
-                    <button class="skip-btn skip-forward-btn">⏭ 30s</button>
-                </div>
-                
-                <!-- Custom Controls -->
-                <div class="custom-controls">
-                    <button class="control-btn play-pause-btn">⏯</button>
-                    <div class="volume-control">
-                        <button class="control-btn mute-btn">🔇</button>
-                        <input type="range" class="volume-slider" min="0" max="100" value="50">
-                    </div>
-                    <button class="control-btn fullscreen-btn">⛶</button>
-                </div>
-            </div>
-            
-            <!-- Progress bar and time display -->
-            <div class="progress-container">
-                <div class="progress-bar"></div>
-            </div>
-            <div class="time-display">
-                <span class="current-time">0:00</span>
-                <span class="duration">0:00</span>
-            </div>
-            
-            <div id="status-bar" class="status-bar"></div>
-        </div>
-        
-        <div class="preset-buttons">
-            <button class="neon-btn neon-btn-1" data-id="8yslaApEuH4">Episode 1</button>
-            <button class="neon-btn neon-btn-2" data-id="i9swPAKkjf8">Episode 2</button>
-            <button class="neon-btn neon-btn-3" data-id="PVcG_gjmcL8">Episode 3</button>
-            <button class="neon-btn neon-btn-4" data-id="giLWS6ShhWw">Episode 4</button>
-            <button class="neon-btn neon-btn-5" data-id="nGn96Dr2ok8">Episode 5</button>         
-                    
-            <button class="neon-btn neon-btn-8" data-id="51RIBf8FvrU">Episode 6</button>     
-            <button class="neon-btn neon-btn-9" data-id="uV3AnZltz4k">Episode 7</button>     
-            <button class="neon-btn neon-btn-10" data-id="fDIJyANQh64">Episode 8</button>
-            
-          <button class="neon-btn neon-btn-1" data-id="_ubBrl459g4">Episode 9</button>
-            <button class="neon-btn neon-btn-2" data-id="r75wJlVL1bo">Episode 10</button>
-            <button class="neon-btn neon-btn-3" data-id="m8F029Nq4NY">Episode 11</button>
-            <button class="neon-btn neon-btn-4" data-id="xUup5atyqzA">Episode 12</button>
-            <button class="neon-btn neon-btn-5" data-id="7SrcCQBL6XY">Episode 13</button>         
-                    
-            <button class="neon-btn neon-btn-8" data-id="lHErur3sZic">Episode 14</button>     
-            <button class="neon-btn neon-btn-9" data-id="DckbOD8V418">Episode 15</button>     
-            <button class="neon-btn neon-btn-10" data-id="Zd9Zs_u8xPM">Episode 16</button>         
-            
-         <button class="neon-btn neon-btn-1" data-id="pbHcZg1pWr8">Episode 17</button>
-            <button class="neon-btn neon-btn-2" data-id="lJ67gcI5U-A">Episode 18</button>
-            <button class="neon-btn neon-btn-3" data-id="zSh9s5KRVz4">Episode 19</button>
-            <button class="neon-btn neon-btn-4" data-id="SewGFTWPhwU">Episode 20</button>
-            <button class="neon-btn neon-btn-5" data-id="N6ddV0FtHZQ">Episode 21</button>         
-                    
-            <button class="neon-btn neon-btn-8" data-id="LPxe4I5iSXI">Episode 22</button>     
-            <button class="neon-btn neon-btn-9" data-id="Rx2jBse1to0">Episode 23</button>     
-            <button class="neon-btn neon-btn-10" data-id="rSRzAj757hI">Episode 24</button>          
-             <button class="neon-btn neon-btn-1" data-id="-934qKDuzVU">Episode 25</button>
-            <button class="neon-btn neon-btn-2" data-id="C6EX0ZZjqzA">Episode 26</button>
-            <button class="neon-btn neon-btn-3" data-id="zNBingJMXPk">Episode 27</button>
-            <button class="neon-btn neon-btn-4" data-id="SLyGdUpbx0k">Episode 28</button>
-            <button class="neon-btn neon-btn-5" data-id="sFFdMQ7-0QU">Episode 29</button>         
-                    
-            <button class="neon-btn neon-btn-8" data-id="pWG8Dx0hMe8">Episode 30</button>     
-            <button class="neon-btn neon-btn-9" data-id="XpQJn6B8zF0">Episode 31</button>     
-            <button class="neon-btn neon-btn-10" data-id="4jAVsLxjulY">Episode 32</button>    
-
-<button class="neon-btn neon-btn-4" data-id="oLeDcPaV6kw">Episode 33</button>
-            <button class="neon-btn neon-btn-5" data-id="MAihwfjeGl8">Episode 34</button>         
-                    
-        
-            
-            
-   <button class="neon-btn neon-btn-8" data-id="qCl5kIXOp_o">Episode 35</button>     
-            <button class="neon-btn neon-btn-9" data-id="aGrfoIvJ3Gw">Episode 36</button>     
-            <button class="neon-btn neon-btn-10" data-id="4L6w_tuDxIU">Episode 37</button>          
-             <button class="neon-btn neon-btn-1" data-id="-caUMHDvo3Vc">Episode 38</button>
-            <button class="neon-btn neon-btn-2" data-id="BSzmQ5eYmU8">Episode 39</button>
-            <button class="neon-btn neon-btn-3" data-id="2jG47RBKpuk">Episode 40</button>
-            <button class="neon-btn neon-btn-4" data-id="hpq5Wm2PCTg">Episode 41</button>
-            <button class="neon-btn neon-btn-5" data-id="xogij-eiCCo">Episode 42</button>         
-                    
-            <button class="neon-btn neon-btn-8" data-id="KRHfPTG6QTo">Episode 43</button>     
-            <button class="neon-btn neon-btn-9" data-id="MFTkK0kdRBU">Episode 44</button>     
-            <button class="neon-btn neon-btn-10" data-id="LbrNP9tF6Ug">Episode 45 </button>    
-
-<button class="neon-btn neon-btn-4" data-id="1jV0uSGMB_c">Episode 46</button>
-              
-        
-<button class="neon-btn neon-btn-10" data-id="9ZZxUOpfHc0">Episode 47</button>    
-
-<button class="neon-btn neon-btn-4" data-id="SCUpryLuiME">Episode 48</button>
-            
-
-<button class="neon-btn neon-btn-10" data-id="d7AfHmRr-38">Episode 49</button>    
-
-<button class="neon-btn neon-btn-4" data-id="G6CXlgjgTBw">Episode 50</button>
-            <button class="neon-btn neon-btn-5" data-id="eM7YEt5yH2M">Episode 51</button>  
-
-<button class="neon-btn neon-btn-10" data-id="RmHulsOL2WY">Episode 52 Promo </button>    
-
-
-
-
-
-
-
-    
-        </div>
-        
-        <div class="video-info">
-            <div class="video-title" id="video-title">Now Playing: Loading...</div>
-            <div class="video-stats">
-                <span id="view-count">0 views</span>
-                <span id="like-count">0 likes</span>
-            </div>
-        </div>
+ </head>
+ <body>
+  <div class="container">
+   <div class="fixed-player">
+    <div class="player-container">
+     <div class="player-cover"></div><iframe id="youtube-player" src="https://www.youtube.com/embed/8yslaApEuH4?enablejsapi=1&amp;rel=0&amp;modestbranding=1&amp;controls=0&amp;showinfo=0&amp;autoplay=1&amp;mute=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> <!-- Skip controls -->
+     <div class="skip-controls">
+      <button class="skip-btn skip-back-btn">⏮ 15s</button> <button class="skip-btn skip-forward-btn">⏭ 30s</button>
+     </div><!-- Custom Controls -->
+     <div class="custom-controls">
+      <button class="control-btn play-pause-btn">⏯</button>
+      <div class="volume-control">
+       <button class="control-btn mute-btn">🔇</button> <input type="range" class="volume-slider" min="0" max="100" value="50">
+      </div><button class="control-btn fullscreen-btn">⛶</button>
+     </div>
+    </div><!-- Progress bar and time display -->
+    <div class="progress-container">
+     <div class="progress-bar"></div>
     </div>
+    <div class="time-display">
+     <span class="current-time">0:00</span> <span class="duration">0:00</span>
+    </div>
+    <div id="status-bar" class="status-bar"></div>
+   </div>
+   <div class="preset-buttons">
+    <button class="neon-btn neon-btn-1" data-id="8yslaApEuH4">Episode 1</button> <button class="neon-btn neon-btn-2" data-id="i9swPAKkjf8">Episode 2</button> 
 
-    <script>
+
+
+<button class="neon-btn neon-btn-3" data-id="PVcG_gjmcL8">Episode 3</button> <button class="neon-btn neon-btn-4" data-id="giLWS6ShhWw">Episode 4</button> <button class="neon-btn neon-btn-5" data-id="nGn96Dr2ok8">Episode 5</button> <button class="neon-btn neon-btn-8" data-id="51RIBf8FvrU">Episode 6</button> <button class="neon-btn neon-btn-9" data-id="uV3AnZltz4k">Episode 7</button> <button class="neon-btn neon-btn-10" data-id="fDIJyANQh64">Episode 8</button> <button class="neon-btn neon-btn-1" data-id="_ubBrl459g4">Episode 9</button> <button class="neon-btn neon-btn-2" data-id="r75wJlVL1bo">Episode 10</button> <button class="neon-btn neon-btn-3" data-id="m8F029Nq4NY">Episode 11</button> <button class="neon-btn neon-btn-4" data-id="xUup5atyqzA">Episode 12</button> <button class="neon-btn neon-btn-5" data-id="7SrcCQBL6XY">Episode 13</button> <button class="neon-btn neon-btn-8" data-id="lHErur3sZic">Episode 14</button> <button class="neon-btn neon-btn-9" data-id="DckbOD8V418">Episode 15</button> <button class="neon-btn neon-btn-10" data-id="Zd9Zs_u8xPM">Episode 16</button> <button class="neon-btn neon-btn-1" data-id="pbHcZg1pWr8">Episode 17</button> <button class="neon-btn neon-btn-2" data-id="lJ67gcI5U-A">Episode 18</button> <button class="neon-btn neon-btn-3" data-id="zSh9s5KRVz4">Episode 19</button> <button class="neon-btn neon-btn-4" data-id="SewGFTWPhwU">Episode 20</button> <button class="neon-btn neon-btn-5" data-id="N6ddV0FtHZQ">Episode 21</button> <button class="neon-btn neon-btn-8" data-id="LPxe4I5iSXI">Episode 22</button> <button class="neon-btn neon-btn-9" data-id="Rx2jBse1to0">Episode 23</button> <button class="neon-btn neon-btn-10" data-id="rSRzAj757hI">Episode 24</button> <button class="neon-btn neon-btn-1" data-id="-934qKDuzVU">Episode 25</button> <button class="neon-btn neon-btn-2" data-id="C6EX0ZZjqzA">Episode 26</button> <button class="neon-btn neon-btn-3" data-id="zNBingJMXPk">Episode 27</button> <button class="neon-btn neon-btn-4" data-id="SLyGdUpbx0k">Episode 28</button> <button class="neon-btn neon-btn-5" data-id="sFFdMQ7-0QU">Episode 29</button> <button class="neon-btn neon-btn-8" data-id="pWG8Dx0hMe8">Episode 30</button> <button class="neon-btn neon-btn-9" data-id="XpQJn6B8zF0">Episode 31</button> <button class="neon-btn neon-btn-10" data-id="4jAVsLxjulY">Episode 32</button> <button class="neon-btn neon-btn-4" data-id="oLeDcPaV6kw">Episode 33</button> <button class="neon-btn neon-btn-5" data-id="MAihwfjeGl8">Episode 34</button> <button class="neon-btn neon-btn-8" data-id="qCl5kIXOp_o">Episode 35</button> <button class="neon-btn neon-btn-9" data-id="aGrfoIvJ3Gw">Episode 36</button> <button class="neon-btn neon-btn-10" data-id="4L6w_tuDxIU">Episode 37</button> <button class="neon-btn neon-btn-1" data-id="-caUMHDvo3Vc">Episode 38</button> <button class="neon-btn neon-btn-2" data-id="BSzmQ5eYmU8">Episode 39</button> <button class="neon-btn neon-btn-3" data-id="2jG47RBKpuk">Episode 40</button> <button class="neon-btn neon-btn-4" data-id="hpq5Wm2PCTg">Episode 41</button> <button class="neon-btn neon-btn-5" data-id="xogij-eiCCo">Episode 42</button> <button class="neon-btn neon-btn-8" data-id="KRHfPTG6QTo">Episode 43</button> <button class="neon-btn neon-btn-9" data-id="MFTkK0kdRBU">Episode 44</button> <button class="neon-btn neon-btn-10" data-id="LbrNP9tF6Ug">Episode 45 </button> <button class="neon-btn neon-btn-4" data-id="1jV0uSGMB_c">Episode 46</button> <button class="neon-btn neon-btn-10" data-id="9ZZxUOpfHc0">Episode 47</button> <button class="neon-btn neon-btn-4" data-id="SCUpryLuiME">Episode 48</button> <button class="neon-btn neon-btn-10" data-id="d7AfHmRr-38">Episode 49</button> <button class="neon-btn neon-btn-4" data-id="G6CXlgjgTBw">Episode 50</button> <button class="neon-btn neon-btn-5" data-id="eM7YEt5yH2M">Episode 51</button> <button class="neon-btn neon-btn-10" data-id="I-cv7560nWA">Episode 52 </button>
+    
+    
+  <button class="neon-btn neon-btn-10" data-id="THjJD2b2YJE">Episode 53 </button>  
+    
+   <button class="neon-btn neon-btn-10" data-id="hpOUKApjVeg ">Episode 54 </button>  
+    
+  <button class="neon-btn neon-btn-10" data-id="O0csdOTxbXo">2nd Last Episode  </button> 
+
+<button class="neon-btn neon-btn-10" data-id="_tPCT_22sQk">Last Episode  </button>  
+    
+    
+    
+    
+    
+    
+   </div>
+   <div class="video-info">
+    <div class="video-title" id="video-title">
+     Now Playing: Loading...
+    </div>
+    <div class="video-stats">
+     <span id="view-count">0 views</span> <span id="like-count">0 likes</span>
+    </div>
+   </div>
+  </div>
+  <script>
         // Load YouTube API
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -1117,9 +1039,6 @@
             document.querySelector('.neon-btn').classList.add('active');
         });
     </script>
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    
-</body>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ </body>
 </html>
